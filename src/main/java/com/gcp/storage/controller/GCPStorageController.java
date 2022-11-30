@@ -2,15 +2,21 @@ package com.gcp.storage.controller;
 
 import com.gcp.storage.model.FPDetails;
 import com.gcp.storage.service.GCPStorageService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping ("/gcp")
 public class GCPStorageController {
+
     @Autowired
     private GCPStorageService gcpStorageService;
 
@@ -22,17 +28,18 @@ public class GCPStorageController {
     }
 
     @GetMapping ("/get-data/{updatedBy}")
-    public String getData(
+    public List<FPDetails> getData(
             @PathVariable String updatedBy
     ) {
         return gcpStorageService.getDataByUpdatedBy(updatedBy);
     }
 
-    @PostMapping("/upload-file")
+    @PostMapping("/{bucketName}/upload-file")
     public String uploadFile(
+            @PathVariable String bucketName,
             @RequestParam("file") MultipartFile multipartFile
     ) throws IOException {
-        return gcpStorageService.uploadFile(multipartFile);
+        return gcpStorageService.uploadFile(bucketName, multipartFile);
     }
 
     @GetMapping ("/download-file/{fileName}")

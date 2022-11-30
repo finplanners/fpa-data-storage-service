@@ -4,12 +4,17 @@ import com.gcp.storage.model.FPDetails;
 import com.gcp.storage.repository.GCPStorageRepository;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+
+import static org.springframework.web.servlet.function.AsyncServerResponse.create;
 
 @Service
 public class GCPStorageService {
@@ -20,9 +25,19 @@ public class GCPStorageService {
 
     @Autowired
     GCPStorageRepository gcpStorageRepository;
-    public String uploadFile(MultipartFile multipartFile) throws IOException {
+
+    @Value("${spring.cloud.gcp.project-id}")
+    private String projectId;
+
+    public Bucket createBucket(String bucketName) {
+        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+
+        return storage.create(BucketInfo.newBuilder(bucketName).build());
+    }
+
+    public String uploadFile(String bucketName, MultipartFile multipartFile) throws IOException {
         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-        BlobId blobId = BlobId.of(BUCKET_NAME, fileName);
+        BlobId blobId = BlobId.of(bucketName, fileName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 
         byte[] arr = multipartFile.getBytes();
@@ -47,7 +62,7 @@ public class GCPStorageService {
         return fpDetailsSaved.toString();
     }
 
-    public String getDataByUpdatedBy(String updatedBy) {
-        return gcpStorageRepository.findAllByUpdatedBy(updatedBy).toString();
+    public List<FPDetails> getDataByUpdatedBy(String updatedBy) {
+        return gcpStorageRepository.findAllByUpdatedBy(updatedBy);
     }
 }

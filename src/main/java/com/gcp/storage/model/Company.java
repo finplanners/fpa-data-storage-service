@@ -7,16 +7,18 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 
-@Entity(name = "sample")
+@Entity(name = "company")
 @ToString
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
-public class FPDetails {
+public class Company {
 
     @Id
     private Long id;
 
-    private String fpData;
-    private String updatedBy;
+    private String companyName;
+    private String industryType;
+    private String department;
+    private Integer numberOfEmployees;
 }
